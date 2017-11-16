@@ -46,12 +46,20 @@ Router.routes = {
         let formData = querystring.parse(url.parse(req.url).query);
 
         const gh = new gitApi();
-        console.log(formData.repo, formData.owner);
 
-        gh
-          .getCommits(formData.repo, formData.owner)
+        gh.getCommits(formData.repo, formData.owner)
           .then(data => {
-            res.write(html.toString().replace(/{{commitfeed}}/, data));
+
+             let newdata = data.data.map(function(commit){
+             let newObj = {sha: commit.sha, html_url: commit.html_url, author: commit.author, message: commit.message}
+             return newObj;
+             
+             
+             })
+      
+             newdata = JSON.stringify(newdata, null, 2);
+
+            res.write(html.toString().replace(/{{commitfeed}}/, newdata));
 
             res.end();
           })
