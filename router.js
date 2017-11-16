@@ -64,7 +64,10 @@ Router.routes = {
             });
 
             newdata = JSON.stringify(newdata, null, 2);
-
+            fs.appendfile('./data/commits.jason', newdata, err => {
+              if (err) throw err;
+              console.log('Data appended');
+            });
             res.write(html.toString().replace(/{{commitfeed}}/, newdata));
 
             res.end();
