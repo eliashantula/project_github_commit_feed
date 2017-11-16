@@ -7,6 +7,12 @@ const data1 = require('./data/commits.json');
 const querystring = require('querystring');
 
 const Router = {};
+let _headers = {
+  'Content-Type': 'text/html',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE'
+};
 
 Router.handle = (req, res) => {
   let method = req.method.toLowerCase();
@@ -77,7 +83,15 @@ Router.routes = {
     }
   },
   post: {
-    '/': (req, res) => {
+    '/github/webhooks': (req, res) => {
+      let body = '';
+
+      req.on('data', data => {
+        body += data;
+      });
+      console.log(body);
+      body = JSON.parse(body);
+
       fs.readFile('./views/index.html', function(err, html) {
         if (err) {
           throw err;
