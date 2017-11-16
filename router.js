@@ -51,6 +51,7 @@ Router.routes = {
         gh
           .getCommits(formData.repo, formData.owner)
           .then(data => {
+            data = JSON.stringify(data, null, 2);
             res.write(html.toString().replace(/{{commitfeed}}/, data));
 
             res.end();
