@@ -97,12 +97,10 @@ Router.routes = {
           throw err;
         }
         res.writeHead(200, {
-          'Content-Type': 'text/html'
-        });
+          _headers);
 
         let data = JSON.stringify(data1, null, 2);
 
-        res.write(html.toString().replace(/{{commitfeed}}/, data));
         res.end();
       });
     }
