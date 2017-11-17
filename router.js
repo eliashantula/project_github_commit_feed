@@ -7,6 +7,12 @@ const data1 = require('./data/commits.json');
 const querystring = require('querystring');
 
 const Router = {};
+let _headers = {
+  'Content-Type': 'text/html',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE'
+};
 
 Router.handle = (req, res) => {
   let method = req.method.toLowerCase();
@@ -47,18 +53,27 @@ Router.routes = {
 
         const gh = new gitApi();
 
-        gh.getCommits(formData.repo, formData.owner)
+        gh
+          .getCommits(formData.repo, formData.owner)
           .then(data => {
+            data = JSON.stringify(data, null, 2);
+            res.write(html.toString().replace(/{{commitfeed}}/, data));
 
-             let newdata = data.data.map(function(commit){
-             let newObj = {sha: commit.sha, html_url: commit.html_url, author: commit.author, message: commit.message}
-             return newObj;
-             
-             
-             })
-      
-             newdata = JSON.stringify(newdata, null, 2);
+            let newdata = data.data.map(function(commit) {
+              let newObj = {
+                sha: commit.sha,
+                html_url: commit.html_url,
+                author: commit.author,
+                message: commit.message
+              };
+              return newObj;
+            });
 
+            newdata = JSON.stringify(newdata, null, 2);
+            fs.appendfile('./data/commits.jason', newdata, err => {
+              if (err) throw err;
+              console.log('Data appended');
+            });
             res.write(html.toString().replace(/{{commitfeed}}/, newdata));
 
             res.end();
@@ -68,18 +83,24 @@ Router.routes = {
     }
   },
   post: {
-    '/': (req, res) => {
+    '/github/webhooks': (req, res) => {
+      let body = '';
+
+      req.on('data', data => {
+        body += data;
+      });
+      console.log(body);
+      body = JSON.parse(body);
+
       fs.readFile('./views/index.html', function(err, html) {
         if (err) {
           throw err;
         }
         res.writeHead(200, {
-          'Content-Type': 'text/html'
-        });
+          _headers);
 
         let data = JSON.stringify(data1, null, 2);
 
-        res.write(html.toString().replace(/{{commitfeed}}/, data));
         res.end();
       });
     }
